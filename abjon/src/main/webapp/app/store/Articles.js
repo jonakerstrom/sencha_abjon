@@ -16,7 +16,7 @@ Ext.define('abjon.store.Articles', {
         proxy: {
             type: 'rest',
             appendId: true,
-            url : '/jboss-javaee6-webapp/rest/articles',
+            url : '/abjon/rest/articles',
             reader: { type: 'json', rootProperty: 'article' },
             writer: {type: 'json'}   
         }
