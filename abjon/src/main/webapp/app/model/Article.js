@@ -4,7 +4,7 @@ Ext.define('abjon.model.Article', {
     config: {
         idProperty: 'id',
         fields: [
-            {name: 'id', type: 'auto', persist: false},
+            {name: 'id', type: 'auto',persist: false},
             'article',
             'latitude',
             'longitude'

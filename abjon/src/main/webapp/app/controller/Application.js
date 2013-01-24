@@ -76,7 +76,7 @@ Ext.define('abjon.controller.Application', {
 
                         store.add(newArticle);
                         store.sync();
-                        store.load(); // should this be nessesary?
+                        //store.load(); // should this be nessesary?
 
                     }
                 }
@@ -159,6 +159,8 @@ Ext.define('abjon.controller.Application', {
         var store = this.getArticleList().getStore();
         
         store.sync();
+        
+        
         
         
         this.getNav().pop();
