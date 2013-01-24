@@ -41,7 +41,7 @@ Ext.define('abjon.view.List', {
                 }
             ],
          
-       
+       /*
             plugins: 
             [
                 'pullrefresh',
@@ -50,15 +50,28 @@ Ext.define('abjon.view.List', {
                     autoPaging: true
                    
                 },
-                {
-                    type: 'slidetoremove',
-                    removeText: 'Ta bort'
-            
-                }
+               
                 
                 
             
             ]
+        */
+            plugins: [
+                  {
+                      xclass: 'Ext.plugin.PullRefresh',
+                      pullRefreshText: 'Dra nedåt för att uppdatera listan.',
+                      refreshFn: function() {             
+                        
+                        Ext.getStore('Articles').load();
+                      }
+                      
+                  },
+                  {
+                      type: 'slidetoremove',
+                      removeText: 'Ta bort'
+              
+                  }
+              ]
     }
     
         

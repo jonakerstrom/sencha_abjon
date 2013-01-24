@@ -75,7 +75,7 @@ public class ArticlesResource {
 	    @Consumes({MediaType.APPLICATION_JSON})
 	    public Article create(Article a) 
 	    {
-	        System.err.append("CALLED CREATE!");
+	        System.err.append("CALLED CREATE");
 	        if(a==null) 
 	        {
 	            a = new Article();
@@ -94,8 +94,9 @@ public class ArticlesResource {
 	    @Consumes({MediaType.APPLICATION_JSON})
 	    public Article update(@PathParam("articleid") String sarticleid,Article article) 
 	    {
-	        System.err.append("CALLED UPDATE!");
+	        
 	        Long articleid = Long.parseLong(sarticleid);
+	        System.err.append("CALLED UPDATE on " + sarticleid);
 	        Article a = null;
 	        a = ab.find(articleid);
 
