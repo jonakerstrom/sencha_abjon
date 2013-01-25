@@ -75,8 +75,10 @@ Ext.define('abjon.controller.Application', {
                         once = true;
 
                         store.add(newArticle);
+                        
                         store.sync();
-                        //store.load(); // should this be nessesary?
+                        
+                        store.load(); // should this be nessesary?
 
                     }
                 }
@@ -164,6 +166,10 @@ Ext.define('abjon.controller.Application', {
         
         
         this.getNav().pop();
+        
+        
+        store.load(); // should this be nessesary?
+
     },
     
     onListSelect: function(view, record) {
