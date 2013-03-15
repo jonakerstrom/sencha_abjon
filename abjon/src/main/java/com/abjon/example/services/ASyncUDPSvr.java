@@ -1,0 +1,136 @@
+package com.abjon.example.services;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.DatagramChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.util.Iterator;
+
+import com.abjon.example.utils.GPSMessageParser;
+
+public class ASyncUDPSvr
+{
+    static int BUF_SZ = 1024;
+    boolean on = true;
+    
+    
+    class Con {
+        ByteBuffer req;
+        ByteBuffer resp;
+        SocketAddress sa;
+
+        public Con() {
+            req = ByteBuffer.allocate(BUF_SZ);
+        }
+    }
+
+    static int port = 15000;
+   
+    public ASyncUDPSvr() throws Exception
+    {
+    	
+    }
+
+    private void read(SelectionKey key){
+    	
+    		
+	    	DatagramChannel chan = (DatagramChannel)key.channel();
+	        Con con = (Con)key.attachment();
+	    try {
+	    		
+	    	    
+	        con.sa = chan.receive(con.req);
+			System.out.println(new String(con.req.array(), "UTF-8"));
+	        GPSMessageParser parser = new GPSMessageParser();
+	        parser.parse(new String(con.req.array(), "UTF-8"));
+	        con.resp = Charset.forName( "UTF-8" ).newEncoder().encode(CharBuffer.wrap("OK"));
+        }
+    	catch(Exception e)
+    	{
+    		try {
+				con.resp = Charset.forName( "UTF-8" ).newEncoder().encode(CharBuffer.wrap("ERROR"));
+				e.printStackTrace();
+			} catch (CharacterCodingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+    	}
+        
+    }
+
+    private void write(SelectionKey key) throws IOException {
+        DatagramChannel chan = (DatagramChannel)key.channel();
+        Con con = (Con)key.attachment();
+        chan.send(con.resp, con.sa);
+    }
+
+   
+	private boolean isOn() {
+		return on;
+	}
+
+	private void setOn(boolean on) {
+		this.on = on;
+	}
+
+    public void stop() throws Exception
+    {
+    	setOn(false);
+    }
+    
+    public void start() throws Exception
+    {
+        new Thread()
+        {
+            public void run()
+            {
+			  try {
+		        	System.out.println("Started ASync UDP service.");
+		            Selector selector = Selector.open();
+		            DatagramChannel channel = DatagramChannel.open();
+		            InetSocketAddress isa = new InetSocketAddress(port);
+		            channel.socket().bind(isa);
+		            channel.configureBlocking(false);
+		            SelectionKey clientKey = channel.register(selector, SelectionKey.OP_READ);
+		            clientKey.attach(new Con());
+		            while (isOn()) {
+		                try {
+		                    selector.select();
+		                    Iterator selectedKeys = selector.selectedKeys().iterator();
+		                    while (selectedKeys.hasNext()) {
+		                        try {
+		                            SelectionKey key = (SelectionKey) selectedKeys.next();
+		                            selectedKeys.remove();
+	
+		                            if (!key.isValid()) {
+		                              continue;
+		                            }
+	
+		                            if (key.isReadable()) {
+		                                read(key);
+		                                key.interestOps(SelectionKey.OP_WRITE);
+		                            } else if (key.isWritable()) {
+		                                write(key);
+		                                key.interestOps(SelectionKey.OP_READ);
+		                            }
+		                        } catch (IOException e) {
+		                            System.err.println("glitch, continuing... " +(e.getMessage()!=null?e.getMessage():""));
+		                        }
+		                    }
+		                } catch (IOException e) {
+		                    System.err.println("glitch, continuing... " +(e.getMessage()!=null?e.getMessage():""));
+		                }
+		            }
+		        } catch (IOException e) {
+		            System.err.println("network error: " + (e.getMessage()!=null?e.getMessage():""));
+		        }
+		}
+      }.start();
+    }    
+}
